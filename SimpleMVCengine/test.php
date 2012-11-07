@@ -1,0 +1,95 @@
+<?php
+// 2012-11-07 BES
+// simple MVC engine
+// [Request + User Model] <--> [Controller <--> [Model <--> DB]] <--> View 
+// 
+
+//---------------------------------------------------------------------
+//--------------------------- Classes  --------------------------------
+//---------------------------------------------------------------------
+
+//--------------------------- Request_Data-----------------------------
+
+class  Request_Data 
+{
+    var $method; // GET, POST
+    var $param; // input vars
+function __construct() {
+    if(is_array($_GET)) {
+        $this->method = 'GET';
+        foreach ($_GET as $name => $value)
+            $this->param[$name] = mysql_real_escape_string($value);
+    }
+
+    if(is_array($_POST)) {
+        $this->method = 'POST';
+        foreach ($_POST as $name => $value)
+            $this->param[$name] = mysql_real_escape_string($value);
+    }
+return true;
+}
+function __destruct() {
+return true;
+}
+} // END class Request_Data
+
+//--------------------------------User_Model---------------------------------
+
+class  User_Model 
+{
+    var $user_data; // 
+    var $session_data; // 
+function __construct() {
+    foreach ($SERVER as $name => $value)
+        $this->user_data[$name] = $value;
+    if(is_array($_SESSION)) {
+        foreach ($_SESSION as $name => $value)
+            $this->session_data[$name] = $value;
+    }
+return true;
+}
+function __destruct() {
+return true;
+}
+} // END class User_Model
+
+//-----------------------------------Data_Model--------------------------------
+
+class  MySQL_Data_Model 
+{
+    var $host; // 
+    var $user; // 
+    var $pass; // 
+    var $connect; // 
+    var $db; // 
+    var $query; // 
+    var $result; // 
+    var $result_table; // 
+function __construct() {
+    if ( $GLOBALS[$connectID] != $this->connect ) {
+        $this->connect = mysql_connect($this->host, $this->user, $this->pass);
+        $GLOBALS[$connectID] = $this->connect;
+    }
+    if ( $GLOBALS[$db] != $this->db )
+        @mysql_select_db($this->db); 
+    $this->result = @mysql_query ( $this->query );
+    for ( $this->result_table = array(); $row = @mysql_fetch_assoc($this->result); $this->result_table[] = $row );
+return true;
+}
+function __destruct() {
+return true;
+}
+} // END class Data_Model
+
+//-----------------------------------Data_Block----------------------------------
+
+class  Data_Block 
+{
+    var $; // 
+function __construct() {
+return true;
+}
+function __destruct() {
+return true;
+}
+} // END class Data_Model
