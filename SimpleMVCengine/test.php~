@@ -67,7 +67,7 @@ class  MySQL_Data_Model
     var $result; // 
     var $result_table; // 
 function __construct() {
-    if ( !$GLOBALS[$connectID] || $this->newconnect ) {
+    if ( !$GLOBALS[$connectID] && !$this->newconnect ) {
         $this->connect = mysql_connect( $this->host, $this->user, $this->pass );
         $GLOBALS[$connectID] = $this->connect;
     }
