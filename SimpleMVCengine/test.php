@@ -1,4 +1,4 @@
-<?php
+<<?php
 // 2012-11-07 BES
 // simple MVC engine
 // [Request + User Model] <--> [Controller <--> [Model <--> DB]] <--> View
@@ -50,9 +50,6 @@ function __construct() {
     }
 return true;
 }
-function __destruct() {
-return true;
-}
 } // END class User_Model
 
 //-----------------------------------MySQL_Data_Model--------------------------------
@@ -88,9 +85,7 @@ function __construct() {
 */
 return true;
 }
-function __destruct() {
-return true;
-}
+
 function send_select_query ( ) {
     @mysql_select_db ( $this->db ) or die ( 'cant connect to db '.$this->db );
     $this->result = @mysql_query ( $this->sql_select_query );
@@ -101,12 +96,16 @@ return true;
 }
 
 function get_sql_select_query ( ) {
-    $fields = implode ( ',' , $this->fields );
+	$where = '';
+	$order = '';
+	$limit = '';
+	$fields = implode ( ',' , $this->fields );
 	$tables = implode ( ',' , $this->tb );
 	if(isset($this->where)) $where = ' WHERE ' . implode ( ' AND ' , $this->where );
 	if(isset($this->order)) $order = ' ORDER BY ' . implode ( ' AND ' , $this->order );
 	if(isset($this->limit)) $limit = ' LIMIT '.$this->limit;
 $this->sql_select_query = "SELECT $fields FROM $tables $where $order $limit";
+echo $this->sql_select_query . '<br>';
 return true;
 }
 
@@ -125,20 +124,44 @@ return true;
 class Data_Block_News extends MySQL_Data_Model
 {
     var $db = 'site_news' ; // 
-    var $tb = array ( 'dayjust' ); // 
-    var $fields = array ( 'uin_publish' , 'title' , 'lid' ); //
+    var $tb = array ( 'dayjust'  ); // 
+    var $fields = array ( 'uin_publish' , 'title' , 'lid', 'uin_source'  ); //
     var $where = array ( 'date = "2012-11-07" ' ); //
     var $order = array ( 'date DESC ' ); //
-    var $limit = '0,3'; //
-    var $pattern = '<div class = "title"><a href="?id=$uin_publish">$title</a></div><div class="lid">$lid</div>';
-    var $css = '.title {font-size: 24px;} .lid {font-style: italic;}';
-function __construct() {
-return true;
-}
-function __destruct() {
+    var $limit = '0,5'; //
+    var $pattern = '<div class = "title">
+<a href="?id=$uin_publish">$title</a>
+</div>
+<div class="lid">$lid</div>
+<div class="source">$source_title</div>';
+    var $css = '.title {font-size: 24px;} 
+.source {font-style: italic;}';
+
+function add_source ( ) {
+	foreach ( $this->result_table as $key => $val ) {
+		if($val['uin_source'] > 0) {
+			$source = new Data_Block_Source;
+			$source->where = array ( 'uin_source = '.$val['uin_source'] ); //
+			$source->data_select ();
+			$this->result_table[$key]['source_title'] = $source->result_table[0]['source_title'];
+		}
+	}
 return true;
 }
 } // END class Data_Model
+
+//-----------------------------------Data_Block_Source----------------------------------
+
+class Data_Block_Source extends MySQL_Data_Model
+{
+    var $db = 'site_news' ; // 
+    var $tb = array ( 'source' ); // 
+    var $fields = array ( 'source_title' ); //
+    var $where = array ( 'uin_source = 0'); //
+
+} // END class Data_Block_Source
+
+
 
 //-----------------------------------function View----------------------------------
 
@@ -158,19 +181,21 @@ return $body;
 //-----------------------------------Controll----------------------------------
 //-----------------------------------------------------------------------------
 
-mysql_connect ( '192.168.2.6' , '' , '' );
+mysql_connect ( '192.168.2.6' , 'admin' , 'ujkjdjkjvrf' );
 
 $today_publications = new Data_Block_News;
 $today_publications->data_select ();
+$today_publications->add_source ();
 
 $yeastoday_publications = new Data_Block_News;
 $yeastoday_publications->where = array ( 'date = "2012-11-06" ' ); //
 $yeastoday_publications->data_select ();
-$yeastoday_publications->pattern = '<div class = "title_little"><a href="?id=$uin_publish">$title</a></div>';
+$yeastoday_publications->add_source ();
+$yeastoday_publications->pattern = '<div class = "title_little"><a href="?id=$uin_publish">$title</a></div><div class="source">$source_title</div>';
 $yeastoday_publications->css = '.title_little {font-size: 14px; text-decoration: underline;} ';
 
 $one_publications = new Data_Block_News;
-$one_publications->sql_select_query = ' SELECT uin_publish, title, lid FROM dayjust WHERE uin_publish = 58764 '; //
+$one_publications->sql_select_query = ' SELECT uin_publish, title, lid, source_title FROM dayjust, source WHERE uin_publish = 58764 AND dayjust.uin_source = source.uin_source'; //
 $one_publications->data_select ();
 
 
