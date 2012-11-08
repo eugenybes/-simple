@@ -158,7 +158,7 @@ return $body;
 //-----------------------------------Controll----------------------------------
 //-----------------------------------------------------------------------------
 
-mysql_connect ( '192.168.2.6' , 'admin' , 'ujkjdjkjvrf' );
+mysql_connect ( '192.168.2.6' , '' , '' );
 
 $today_publications = new Data_Block_News;
 $today_publications->data_select ();
