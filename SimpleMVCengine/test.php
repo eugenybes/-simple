@@ -1,4 +1,4 @@
-<<?php
+<?php
 // 2012-11-07 BES
 // simple MVC engine
 // [Request + User Model] <--> [Controller <--> [Model <--> DB]] <--> View
@@ -140,8 +140,12 @@ class Data_Block_News extends MySQL_Data_Model
 function add_source ( ) {
 	foreach ( $this->result_table as $key => $val ) {
 		if($val['uin_source'] > 0) {
-			$source = new Data_Block_Source;
+			$source = new Data_Block_News;
+			$source->tb = array ( 'source' ); // 
+			$source->fields = array ( 'source_title' ); //
 			$source->where = array ( 'uin_source = '.$val['uin_source'] ); //
+			$source->order = NULL; //
+			$source->limit = NULL; //
 			$source->data_select ();
 			$this->result_table[$key]['source_title'] = $source->result_table[0]['source_title'];
 		}
